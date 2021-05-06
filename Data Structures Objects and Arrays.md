@@ -139,6 +139,16 @@ let deepCopy = obj => {
   }
   return objArray;
 }
+//递归法
+function deepCopy(obj) {
+    //判断是否为数组
+  let res = obj instanceof Array ? [] : {};
+    //Object.entries返回数组[键:值]解构赋值=[key,val]
+  for(let [key,val] of Object.entries(obj)) {
+    res[key] = typeof val == "object" ? deepCopy(val) : val;
+  }
+  return res;
+}
 
 let obj2 = deepCopy(obj1);
 obj2.language[1] = ["二", "三"];
