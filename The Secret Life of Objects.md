@@ -213,7 +213,11 @@ temp.fahrenheit = "xa";
 
 ### A vector type
 
-写一个`Vec`代表二维空间中向量的类。它带有`x`和`y`参数（数字），应将其保存到相同名称的属性中。给`Vec`原型提供两个方法，`plus`和`minus`，它们将另一个向量作为参数，并返回一个新向量，该向量具有两个向量（`this`和参数）的*x*和*y*值之和或差。`length`在原型中添加一个getter属性，该属性可计算向量的长度，即点（*x*，*y*）与原点（0，0）的距离。
+写一个`Vec`代表二维空间中向量的类。它带有`x`和`y`参数（数字），应将其保存到相同名称的属性中。
+
+给`Vec`原型提供两个方法，`plus`和`minus`，它们将另一个向量作为参数，并返回一个新向量，该向量具有两个向量（`this`和参数）的*x*和*y*值之和或差。
+
+`length`在原型中添加一个getter属性，该属性可计算向量的长度，即点（*x*，*y*）与原点（0，0）的距离。
 
 ```javascript
 class Vec {
@@ -237,5 +241,112 @@ console.log(new Vec(1, 2).minus(new Vec(2, 3)));
 // → Vec{x: -1, y: -1}
 console.log(new Vec(3, 4).length);
 // → 5
+```
+
+### Groups
+
+编写一个名为`Group`（因为`Set`已经采取了）的类。象`Set`，它有`add`，`delete`和`has`方法。它的构造函数创建一个空组，`add`向该组添加一个值（但仅当它还不是成员时），`delete`从该组中删除其参数（如果它是一个成员），并`has`返回一个布尔值，指示其参数是否为该组的成员。
+
+使用`===`运算符或诸如之类的等效项`indexOf`来确定两个值是否相同。
+
+为该类提供一个静态`from`方法，该方法采用一个可迭代的对象作为参数，并创建一个包含通过迭代产生的所有值的组。
+
+```javascript
+class Group {
+  constructor() {
+    this.arr = [];
+  }
+  add(val) {
+    this.arr.push(val);
+  }
+  delete(val) {
+    this.arr = this.arr.filter(el => el != val);
+  }
+  has(val) {
+    return this.arr.includes(val);
+  }
+  static from(arr) {
+    let group = new Group();
+    for (let key of arr) {
+      group.add(key);
+    }
+    return group;
+  }
+}
+let group = Group.from([10, 20]);
+console.log(group.has(10));
+// → true
+console.log(group.has(30));
+// → false
+group.add(10);
+group.delete(10);
+console.log(group.has(10));
+// → false
+```
+
+### Iterable groups
+
+使`Group`变得可迭代。
+
+```javascript
+class GroupIterator {
+  constructor(group) {
+    this.group = group;
+    this.flag = 0;
+  }
+  next() {
+    if (this.flag >= this.group.arr.length) return {
+      done: true
+    };
+    let value = {
+      value: this.group.arr[this.flag],
+      done: false
+    };
+    this.flag++;
+    return value;
+  }
+}
+class Group {
+  constructor() {
+    this.arr = [];
+  }
+  add(val) {
+    this.arr.push(val);
+  }
+  delete(val) {
+    this.arr = this.arr.filter(el => el != val);
+  }
+  has(val) {
+    return this.arr.includes(val);
+  }
+  static from(arr) {
+    let group = new Group();
+    for (let key of arr) {
+      group.add(key);
+    }
+    return group;
+  }
+}
+Group.prototype[Symbol.iterator] = function () {
+  return new GroupIterator(this);
+}
+for (let value of Group.from(["a", "b", "c"])) {
+  console.log(value);
+}
+// → a
+// → b
+// → c
+```
+
+### Borrowing a method
+
+想一种方法来调用`hasOwnProperty`具有该名称自己的属性的对象。
+
+```javascript
+let map = {one: true, two: true, hasOwnProperty: true};
+
+// Fix this call
+console.log(Object.prototype.hasOwnProperty.call(map, "one");
+// → true
 ```
 
